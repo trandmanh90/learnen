@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz: Random Verb - LearnEn</title>
+  <link rel="stylesheet" href="../../assets/css/style.css?v=3.0">
+</head>
+<body>
+  <div class="container">
+    <div class="brand-header">
+      <a href="../../index.html" class="brand-logo" title="Về trang chủ">
+        <span class="brand-icon">📚</span> LearnEn
+      </a>
+    </div>
+
+    <h1>Luyện Tập Động Từ</h1>
+    <p class="subtitle">Dịch chính xác từ hiển thị trong khung</p>
+
+    <div class="prompt-card">
+      <span class="prompt-label" id="directionLabel">Từ cần dịch</span>
+      <span class="verb-word" id="verb"></span>
+    </div>
+
+    <div class="input-group">
+      <input type="text" id="answer" autocomplete="off" autofocus placeholder="Nhập đáp án..." />
+    </div>
+
+    <div class="btn-group">
+      <button type="button" class="btn-primary" id="checkBtn">Kiểm tra</button>
+      <button type="button" class="btn-next" id="nextBtn" style="display: none;">Tiếp tục →</button>
+    </div>
+
+    <div class="result" id="result"></div>
+
+    <div class="footer-nav">
+      <a href="../../index.html" class="back-link">← Quay lại trang chủ</a>
+    </div>
+  </div>
+
+  <script>
+    // Mapping of 4 basic verbs to Vietnamese meanings
+    const mapping = {
+      get: "lấy",
+      make: "làm",
+      take: "nhận",
+      give: "cho"
+    };
+
+    let previous = null;
+    let correctAnswer = "";
+
+    const verbElem = document.getElementById('verb');
+    const directionLabel = document.getElementById('directionLabel');
+    const answerInput = document.getElementById('answer');
+    const resultDiv = document.getElementById('result');
+    const checkBtn = document.getElementById('checkBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function loadQuestion() {
+      const entries = Object.entries(mapping);
+      let entry, showEnglish;
+
+      // Avoid repeating the previous question
+      do {
+        entry = entries[Math.floor(Math.random() * entries.length)];
+        showEnglish = Math.random() < 0.5; // true: show EN -> ask VI; false: show VI -> ask EN
+      } while (previous && entry[0] === previous.verb && showEnglish === previous.showEnglish);
+
+      const [english, vietnamese] = entry;
+      const verbText = showEnglish ? english : vietnamese;
+      correctAnswer = showEnglish ? vietnamese : english;
+
+      verbElem.textContent = verbText;
+      directionLabel.textContent = showEnglish ? "Tiếng Anh ➔ Tiếng Việt" : "Tiếng Việt ➔ Tiếng Anh";
+
+      // Reset UI state
+      resultDiv.className = "result";
+      resultDiv.textContent = "";
+      answerInput.value = "";
+      answerInput.focus();
+      nextBtn.style.display = "none";
+      previous = { verb: entry[0], showEnglish };
+    }
+
+    function checkAnswer() {
+      const userInput = answerInput.value.trim().toLowerCase();
+      if (userInput === "") {
+        resultDiv.className = "result warning";
+        resultDiv.textContent = "⚠️ Vui lòng nhập đáp án!";
+        return;
+      }
+
+      if (userInput === correctAnswer.toLowerCase()) {
+        resultDiv.className = "result correct";
+        resultDiv.textContent = "🎉 Chính xác! Rất tốt!";
+        nextBtn.style.display = "inline-flex";
+        nextBtn.focus();
+      } else {
+        resultDiv.className = "result wrong";
+        resultDiv.textContent = "❌ Chưa đúng, hãy thử lại!";
+        nextBtn.style.display = "inline-flex";
+      }
+    }
+
+    checkBtn.addEventListener('click', checkAnswer);
+    nextBtn.addEventListener('click', loadQuestion);
+
+    // Support Enter key to check or advance
+    answerInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (resultDiv.classList.contains('correct')) {
+          loadQuestion();
+        } else {
+          checkAnswer();
+        }
+      }
+    });
+
+    loadQuestion();
+  </script>
+</body>
+</html>
